@@ -108,7 +108,5 @@ public class UseInterrupts
             }
         }
 
-        loopThread.interrupt();
-
     }
 }
