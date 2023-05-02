@@ -1,5 +1,8 @@
 package sbu.cs;
 
+import java.time.Duration;
+import java.time.Instant;
+
 /*
     In this exercise, you must analyse the following code and use interrupts
     in the main function to terminate threads that run for longer than 3 seconds.
@@ -30,18 +33,18 @@ public class UseInterrupts
         @Override
         public void run() {
             System.out.println(this.getName() + " is Active.");
-
+ 
             while (this.sleepCounter > 0)
             {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-
-                }
-                finally {
+                    System.out.println(this.getName() + " has been interrupted");
+                    break;
+                } finally {
                     this.sleepCounter--;
-                    System.out.println("Number of sleeps remaining: " + this.sleepCounter);
                 }
+                System.out.println("Number of sleeps remaining: " + this.sleepCounter);
             }
 
         }
@@ -66,10 +69,14 @@ public class UseInterrupts
         public void run() {
             System.out.println(this.getName() + " is Active.");
 
-            for (int i = 0; i < 10; i += 3)
+            for (int i = 0; i < 10 && !this.isInterrupted(); i += 3)
             {
                 i -= this.value;
 
+            }
+
+            if(this.isInterrupted()) {
+                System.out.println(this.getName() + " has been interrupted");
             }
         }
     }
@@ -82,12 +89,26 @@ public class UseInterrupts
         SleepThread sleepThread = new SleepThread(5);
         sleepThread.start();
 
-        // TODO  Check if this thread runs for longer than 3 seconds (if it does, interrupt it)
+        Instant startTime = Instant.now();
+
+        while (sleepThread.isAlive()){
+            if (Duration.between(startTime, Instant.now()).getSeconds() > 3){
+                sleepThread.interrupt();
+            }
+        }
 
         LoopThread loopThread = new LoopThread(3);
         loopThread.start();
 
-        // TODO  Check if this thread runs for longer than 3 seconds (if it does, interrupt it)
+        startTime = Instant.now();
+
+        while (loopThread.isAlive()){
+            if (Duration.between(startTime, Instant.now()).getSeconds() > 3){
+                loopThread.interrupt();
+            }
+        }
+
+        loopThread.interrupt();
 
     }
 }
